@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<style>
+    #ball {
+        position: absolute;
+        top: 50%;
+        right: 50%;
+        width: 40px;
+        height: 40px;
+        transform: translate(50%, -50%);
+        background-color: #F02137;
+        border-radius: 50%;
+    }
+
+</style>
+
+
+<div id="ball"></div>
+
+
+<script>
+    let divBall = document.getElementById('ball');
+
+    function getPositionWithAcceleration(from = [0, 0], duration = 0, speed = 0, angle = 0, acceleration = 0) {  //Позиция при равноускоренном движении
+        if ((speed + duration / 1000 * acceleration) < 0) return null  // fix negative speed
+        let S = duration / 1000 * speed + acceleration * Math.pow(duration / 1000, 2) / 2;
+        let cos = Math.cos(angle * Math.PI / 180).toFixed(2);
+        let sin = Math.sin(angle * Math.PI / 180).toFixed(2);
+        let x = from[0] + S * cos                        // позиции объекта по оси Х
+        let y = from[1] + S * sin                       // позиции объекта по оси Y
+        return {x: x, y: y}
+    }
+
+    function getPositionWhenTurning(from = [0, 0], duration = 0, speed = 0, angle = 0, speedTurn=0) {
+        let S = duration / 1000 * speed;
+        let cos = Math.cos(angle + duration / 1000 * speedTurn * Math.PI / 180).toFixed(2);
+        let sin = Math.sin(angle + duration / 1000 * speedTurn * Math.PI / 180).toFixed(2);
+        let x = from[0] + S * cos                        // позиции объекта по оси Х
+        let y = from[1] + S * sin                       // позиции объекта по оси Y
+        return {x: x, y: y}
+    }
+
+    function animateMoveStraight(from, duration, speed, angle, acceleration) {
+        let start = performance.now();
+        requestAnimationFrame(function animate(time) {
+            let timeStep = (time - start);
+            if (timeStep > duration) timeStep = duration;
+
+            const position = getPositionWithAcceleration(from, timeStep, speed, angle, acceleration)
+            if (position) render(position);
+
+            if (timeStep < duration) {
+                requestAnimationFrame(animate);
+            }
+
+        });
+    }
+
+    function animateMoveTurn(from, duration, speed, angle, speedTurn) {
+        let start = performance.now();
+        requestAnimationFrame(function animate(time) {
+            let timeStep = (time - start);
+            if (timeStep > duration) timeStep = duration;
+
+            const position = getPositionWhenTurning(from, timeStep, speed, angle, speedTurn)
+            if (position) render(position);
+
+            if (timeStep < duration) {
+                requestAnimationFrame(animate);
+            }
+
+        });
+    }
+
+    function render(position) {
+        divBall.style.left = position.x + 'px';         //изменение позиции объекта по оси Х
+        divBall.style.top = position.y + 'px';          //изменение позиции объекта по оси У
+    }
+
+
+    animateMoveStraight([0, 100],5000, 20, 45, 60) // координаты(x,y), время(ms), скорость(px/s), угол(grad), ускорение/торможение(px/s)
+    // animateMoveTurn([400, 400], 5000, 30, 45, 80) // координаты(x,y), время(ms), скорость(px/s), угол(grad), скорость поворота(gard/s)
+
+
+</script>
+<script src="index.js"></script>
+</body>
+</html>
